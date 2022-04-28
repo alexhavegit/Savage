@@ -14,8 +14,9 @@ HWND hWnd;
 BITMAPINFOHEADER bmiHeader = { 0 };
 BITMAPINFO info = { 0 };
 BITMAPV5HEADER header = { 0 };
+int image_size = 800 * 450 * 3;
 char* aimp_buffer;
-
+HBITMAP MainBitmap;
 
 
 
@@ -67,16 +68,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     SetTimer(hWnd, TM_TIMER_1, 100, NULL);
 
 
-    int counter = 0;
-    int image_size = 800 * 450 * 3;
-
     aimp_buffer = (char*)malloc(image_size * sizeof(char));
-    for (counter = 0; counter < image_size;)
-    {
-        aimp_buffer[counter++] = 0;
-        aimp_buffer[counter++] = 100;
-        aimp_buffer[counter++] = 0;
-    }
 
 
 
@@ -172,21 +164,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 void PaintExperiments(HWND hWnd, HDC hDC)
 {
 
+    memset((char*)aimp_buffer, 0, image_size * sizeof(char));
 
-    //BYTE* pData = (BYTE*)aimp_buffer + sizeof(BITMAPINFOHEADER) + info.bmiHeader.biClrUsed * sizeof(COLORREF);
 
-    HBITMAP hBitmap = CreateDIBitmap(GetDC(hWnd), (BITMAPINFOHEADER*)&header,
-        CBM_INIT, (char*)aimp_buffer, &info, DIB_RGB_COLORS);
+    int counter = 0;
+    for (counter = 0; counter < image_size;)
+    {
+        aimp_buffer[counter++] = 0;
+        aimp_buffer[counter++] = 100;
+        aimp_buffer[counter++] = 0;
+    }
 
-    // *hBitmap
 
-    // (void*)pData
-    // (void*)ads_scrbuf->avo_buffer
-    //DisplayError(GetLastError(), L"BeginPaint");
+    // MainBitmap = CreateDIBitmap(GetDC(hWnd), (BITMAPINFOHEADER*)&header, CBM_INIT, (char*)aimp_buffer, &info, DIB_RGB_COLORS);
 
-    HBITMAP hBMP = (HBITMAP)LoadImage(hInst, L"D:\\Coding\\cpt64\\other_files\\video_memory_initial_image.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
-    GetDIBits(hDC, hBMP, 0, 450, (char*)aimp_buffer, &info, DIB_RGB_COLORS);
+    //HBITMAP hBMP = (HBITMAP)LoadImage(hInst, L"D:\\Coding\\cpt64\\other_files\\video_memory_initial_image.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    //GetDIBits(hDC, hBMP, 0, 450, (char*)aimp_buffer, &info, DIB_RGB_COLORS);
+
 
     /*
        HDC hMemDC = CreateCompatibleDC(hDC);
@@ -207,60 +202,16 @@ void PaintExperiments(HWND hWnd, HDC hDC)
 
 
 
-    int* p = (HBITMAP*)hBMP;
+    //int* p = (HBITMAP*)hBMP;
 
 
-    //SetDIBitsToDevice(hDC, 0, 0, 100, 100, 0, 0, 0, 100, (char*)aimp_buffer, &info, DIB_RGB_COLORS);
 
+    
+    //HBITMAP CreateBitmap( [in] int  nWidth,  [in] int nHeight,  [in] UINT   nPlanes, [in] UINT  nBitCount, [in] const VOID * lpBits    );
 
     SetDIBitsToDevice(hDC, 0, 0, 800, 450, 0, 0, 0, 450, (char*)aimp_buffer, &info, DIB_RGB_COLORS);
 
-    //HBITMAP CreateBitmap( [in] int  nWidth,  [in] int nHeight,  [in] UINT   nPlanes, [in] UINT  nBitCount, [in] const VOID * lpBits    );
-
-
-
-
 }
-
-/*
-HBITMAP MyCreateBitmap(
-    HDC hdc,
-    INT cx,
-    INT cy,
-    INT nColors)
-{
-    BITMAPINFOHEADER bmih;
-
-    if (nColors == 2) {
-        return CreateBitmap(cx, cy, 1, 1, NULL);
-    }
-    else {
-        bmih.biSize = sizeof(BITMAPINFOHEADER);
-        bmih.biWidth = cx;
-        bmih.biHeight = cy;
-        bmih.biPlanes = 1;              // 1 plane, 4 bpp is
-        bmih.biBitCount = 4;            // 16 colors.
-
-        bmih.biCompression =
-        bmih.biSizeImage =
-        bmih.biXPelsPerMeter =
-        bmih.biYPelsPerMeter =
-        bmih.biClrUsed =
-        bmih.biClrImportant = 0;
-
-        return CreateDIBitmap(hdc, &bmih, 0L, NULL, NULL, 0);
-    }
-}
-
-
-
-
-
-
-*/
-
-
-
 
 
 
@@ -276,3 +227,7 @@ void DisplayError(DWORD dw, const char* szFuncName)
         NULL);
     MessageBox(NULL, buff, szFuncName, MB_OK);
 }
+
+
+
+
