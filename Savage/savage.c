@@ -49,6 +49,11 @@ typedef struct
 } SV_Point;
 
 SV_Point p1 = { 300,100 };  //400, 300      //450, 330
+SV_Point p2 = { 330,100 };
+SV_Point p3 = { 300,115 };
+SV_Point p4 = { 330,115 };
+
+
 
 
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -274,7 +279,7 @@ void PaintExperiments(HWND hWnd, HDC hDC)
     */
 
     double Ax = 0, Ay = 0;
-    double Cx = 400, Cy = 200;
+    double Cx = 315 , Cy = 107;     // 400 200
     // SV_Point p1 = { 450, 330 };
 
     Ax = 100 + time;
@@ -291,11 +296,19 @@ void PaintExperiments(HWND hWnd, HDC hDC)
     double angle = time * 3.6;  // 0.89  
 
 
-    SV_Rotate_Point(Cx, Cy, &p1.x, &p1.y, angle);   //
+    SV_Rotate_Point(Cx, Cy, &p1.x, &p1.y, 10);   //
+    SV_Rotate_Point(Cx, Cy, &p2.x, &p2.y, 10);
+    SV_Rotate_Point(Cx, Cy, &p3.x, &p3.y, 10);
+    SV_Rotate_Point(Cx, Cy, &p4.x, &p4.y, 10);
+
+
 
     SV_Color c = { 255, 255, 255 };  //  255, 0, 0 
 
     SV_SetPixel(p1.x, p1.y, c);
+    SV_SetPixel(p2.x, p2.y, c);
+    SV_SetPixel(p3.x, p3.y, c);
+    SV_SetPixel(p4.x, p4.y, c);
 
     
 
@@ -315,9 +328,9 @@ void PaintExperiments(HWND hWnd, HDC hDC)
     char array[30];
     //sprintf_s(array,20, "%f", watch);
 
-    swprintf(cWatch, 10, L"%f", watch);
+    swprintf(cWatch, 20, L"%f", watch);
 
-    TextOut(hDC, 10, 10, cWatch, 10); //cWatch
+    TextOut(hDC, 10, 10, cWatch, 20); //cWatch
 
 }
 
@@ -402,7 +415,7 @@ void SV_Rotate_Point(double CenterX, double CenterY, double *PointX, double *Poi
     }
 
 
-    //angle = 10;
+    angle = 10;
 
     
 
@@ -415,8 +428,8 @@ void SV_Rotate_Point(double CenterX, double CenterY, double *PointX, double *Poi
 
 
 
-    *PointX = CenterX + lengthCA * sin((angle * M_PI)/180);  // sin(angle * val)
-    *PointY = CenterY + lengthCA * cos((angle * M_PI)/180);  // cos(angle * val)
+    *PointX = CenterX + lengthCA * sin((angle+a * M_PI)/180);  // sin(angle * val)
+    *PointY = CenterY + lengthCA * cos((angle+a * M_PI)/180);  // cos(angle * val)
 
 
 
@@ -429,7 +442,7 @@ void SV_Rotate_Point(double CenterX, double CenterY, double *PointX, double *Poi
     double dif = lengthCA - lengthCA2;
 
 
-    watch = lengthCA;
+    watch = dif;
     
 }
 
