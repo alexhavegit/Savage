@@ -56,7 +56,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 void PaintExperiments(HWND, HDC);
 void DisplayError(DWORD, const char*);
 void SV_SetPixel(int, int, SV_Color);
-void SV_Rotate_Point(int, int, int*, int*, int);
+void SV_Rotate_Point(int, int, int*, int*, double);
 
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -97,8 +97,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
 
 
-    SetTimer(hWnd, TM_SCREEN_REDRAW_TIMER, 35, NULL);
-    SetTimer(hWnd, TM_TIMER_1, 50, NULL);
+    SetTimer(hWnd, TM_SCREEN_REDRAW_TIMER, 200, NULL);  // 35
+    SetTimer(hWnd, TM_TIMER_1, 200, NULL);
 
 
     aimp_buffer = (char*)malloc(image_size * sizeof(char));
@@ -288,10 +288,10 @@ void PaintExperiments(HWND hWnd, HDC hDC)
     //p1.x = 450;
     //p1.y = 330;
 
-    int angle = time * 3.6;  // 0.89  
+    double angle = time * 3.6;  // 0.89  
 
 
-    SV_Rotate_Point(Cx, Cy, &p1.x, &p1.y, 1);   //
+    SV_Rotate_Point(Cx, Cy, &p1.x, &p1.y, angle);   //
 
     SV_Color c = { 255, 255, 255 };  //  255, 0, 0 
 
@@ -354,17 +354,21 @@ void SV_SetPixel(int x, int y, SV_Color col)
 //void increent(int& val){    val++;}
 
 
-void SV_Rotate_Point(int CenterX, int CenterY, int  *PointX, int  *PointY, float angle)
+void SV_Rotate_Point(int CenterX, int CenterY, int  *PointX, int  *PointY, double angle)
 {
     double lengthCA = 0;
 
-    lengthCA = sqrt(pow((CenterX - *PointX), 2) + pow((CenterY - *PointY), 2));
+    double p1 = pow((CenterX - *PointX), 2);
+    double p2 = pow((CenterY - *PointY), 2);
+
+
+    lengthCA = sqrt(p1 + p2);
 
     //lengthCA = 199;
 
     //lengthAB = lengthCA * sin(angle * M_PIdiv180);
 
-    float ang = (*PointY - CenterY) / lengthCA;
+    double ang = (*PointY - CenterY) / lengthCA;
 
     
 
@@ -374,34 +378,22 @@ void SV_Rotate_Point(int CenterX, int CenterY, int  *PointX, int  *PointY, float
 
     if (*PointX < CenterX)
     {
-        ang = (CenterY - *PointY) / lengthCA;
+        ang = (double)(CenterY - *PointY) / lengthCA;
     }
 
-    float a = acos(ang) * 180 / M_PI;
+    double a = (double)acos(ang) * 180 / M_PI;
 
 
     if (*PointX == CenterX)
     {
         if (*PointY > CenterY)
-        {
-            a = 0;
-        }
-        else
-        {
-            a = 180;
-        }
+        {a = 0;}else{a = 180;}
     }
 
     if (*PointY == CenterY)
     {
         if (*PointX > CenterX)
-        {
-            a = 90;
-        }
-        else
-        {
-            a = 270;
-        }
+        {a = 90;}else{a = 270;}
     }
 
     if (*PointX < CenterX)
@@ -410,15 +402,36 @@ void SV_Rotate_Point(int CenterX, int CenterY, int  *PointX, int  *PointY, float
     }
 
 
-    angle = 10;
+    //angle = 10;
 
-    watch = a;
+    
 
-    float an = angle + a;
+    double sinAlpha = sin((angle * M_PI) / 180);
+    double cosAlpha = cos((angle * M_PI) / 180);
 
 
-    *PointX = CenterX + lengthCA * sin((an) * M_PIdiv180);  // sin(angle * val)
-    *PointY = CenterY + lengthCA * cos((angle + a)  * M_PIdiv180);  // cos(angle * val)
+    double xCircle1 = CenterX + (*PointX - CenterX) * cosAlpha - (*PointY - CenterY) * sinAlpha;
+    double yCircle1 = CenterY + (*PointX - CenterX) * sinAlpha + (*PointY - CenterY) * cosAlpha;
+
+
+
+    *PointX = CenterX + lengthCA * cos((angle * M_PI)/180);  // sin(angle * val)
+    *PointY = CenterY + lengthCA * sin((angle * M_PI)/180);  // cos(angle * val)
+
+
+    *PointX = xCircle1;
+    *PointY = yCircle1;
+
+    double p12 = pow((CenterX - *PointX), 2);
+    double p22 = pow((CenterY - *PointY), 2);
+
+
+    double lengthCA2 = sqrt(p12 + p22);
+
+    double dif = lengthCA - lengthCA2;
+
+
+    watch = lengthCA;
     
 }
 
