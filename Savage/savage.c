@@ -6,7 +6,7 @@
 #include <wingdi.h>
 #include <stdbool.h>
 #include <math.h>
-
+#include <stdio.h>
 
 // 
 
@@ -31,6 +31,7 @@ char* aimp_buffer;
 HBITMAP MainBitmap;
 
 int time = 0;
+float watch;
 
 typedef struct
 {
@@ -47,7 +48,7 @@ typedef struct
 
 } SV_Point;
 
-SV_Point p1 = { 450, 330 };
+SV_Point p1 = { 300,100 };  //400, 300      //450, 330
 
 
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -96,8 +97,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
 
 
-    SetTimer(hWnd, TM_SCREEN_REDRAW_TIMER, 33, NULL);
-    SetTimer(hWnd, TM_TIMER_1, 100, NULL);
+    SetTimer(hWnd, TM_SCREEN_REDRAW_TIMER, 35, NULL);
+    SetTimer(hWnd, TM_TIMER_1, 50, NULL);
 
 
     aimp_buffer = (char*)malloc(image_size * sizeof(char));
@@ -234,8 +235,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 void PaintExperiments(HWND hWnd, HDC hDC)
 {
 
-    //memset((char*)aimp_buffer, 0, image_size * sizeof(char));
+    memset((char*)aimp_buffer, 0, image_size * sizeof(char));
 
+    /*
 
     int counter = 0;
     for (counter = 0; counter < image_size;)
@@ -244,7 +246,7 @@ void PaintExperiments(HWND hWnd, HDC hDC)
         aimp_buffer[counter++] = 100;
         aimp_buffer[counter++] = 0;
     }
-
+*/
 
     // MainBitmap = CreateDIBitmap(GetDC(hWnd), (BITMAPINFOHEADER*)&header, CBM_INIT, (char*)aimp_buffer, &info, DIB_RGB_COLORS);
 
@@ -272,7 +274,8 @@ void PaintExperiments(HWND hWnd, HDC hDC)
     */
 
     int Ax = 0, Ay = 0;
-    int Cx = 400, Cy = 225;
+    int Cx = 400, Cy = 200;
+    // SV_Point p1 = { 450, 330 };
 
     Ax = 100 + time;
     Ay = 200;
@@ -282,17 +285,19 @@ void PaintExperiments(HWND hWnd, HDC hDC)
 
     //p1.x += time;
    
-    p1.x = 450;
-    p1.y = 330;
+    //p1.x = 450;
+    //p1.y = 330;
 
-    int angle = 0 + time * 3.6;
+    int angle = time * 3.6;  // 0.89  
 
 
-    SV_Rotate_Point(Cx, Cy, &p1.x, &p1.y, angle);
+    SV_Rotate_Point(Cx, Cy, &p1.x, &p1.y, 1);   //
 
-    SV_Color c = { 255, 0, 0 };
+    SV_Color c = { 255, 255, 255 };  //  255, 0, 0 
 
     SV_SetPixel(p1.x, p1.y, c);
+
+    
 
 
     //int* p = (HBITMAP*)hBMP;
@@ -303,6 +308,16 @@ void PaintExperiments(HWND hWnd, HDC hDC)
     //HBITMAP CreateBitmap( [in] int  nWidth,  [in] int nHeight,  [in] UINT   nPlanes, [in] UINT  nBitCount, [in] const VOID * lpBits    );
 
     SetDIBitsToDevice(hDC, 0, 0, 800, 450, 0, 0, 0, 450, (char*)aimp_buffer, &info, DIB_RGB_COLORS);
+
+    wchar_t cWatch[30] = L"12345";
+
+
+    char array[30];
+    //sprintf_s(array,20, "%f", watch);
+
+    swprintf(cWatch, 10, L"%f", watch);
+
+    TextOut(hDC, 10, 10, cWatch, 10); //cWatch
 
 }
 
@@ -339,45 +354,71 @@ void SV_SetPixel(int x, int y, SV_Color col)
 //void increent(int& val){    val++;}
 
 
-void SV_Rotate_Point(int CenterX, int CenterY, int  *PointX, int  *PointY, int angle)
+void SV_Rotate_Point(int CenterX, int CenterY, int  *PointX, int  *PointY, float angle)
 {
-    float lengthCA = 0, lengthAB = 0, val;
+    double lengthCA = 0;
 
     lengthCA = sqrt(pow((CenterX - *PointX), 2) + pow((CenterY - *PointY), 2));
 
-    lengthAB = lengthCA * sin(angle * M_PIdiv180);
+    //lengthCA = 199;
 
+    //lengthAB = lengthCA * sin(angle * M_PIdiv180);
 
+    float ang = (*PointY - CenterY) / lengthCA;
 
+    
 
+    //angle = 1;
 
-    val = M_PIdiv180; // M_PI / 180;  
+    //ang = 0.999;
 
-
-    if (*PointX > CenterX &&  *PointY > CenterY )
+    if (*PointX < CenterX)
     {
-        *PointX = *PointX + lengthCA * sin(angle * val);
-        *PointY = *PointY - lengthCA * sin(angle * val);
+        ang = (CenterY - *PointY) / lengthCA;
     }
 
-    if (*PointX > CenterX && *PointY < CenterY)
+    float a = acos(ang) * 180 / M_PI;
+
+
+    if (*PointX == CenterX)
     {
-        *PointX = *PointX - lengthCA * sin(angle * val);
-        *PointY = *PointY - lengthCA * sin(angle * val);
+        if (*PointY > CenterY)
+        {
+            a = 0;
+        }
+        else
+        {
+            a = 180;
+        }
+    }
+
+    if (*PointY == CenterY)
+    {
+        if (*PointX > CenterX)
+        {
+            a = 90;
+        }
+        else
+        {
+            a = 270;
+        }
+    }
+
+    if (*PointX < CenterX)
+    {
+        a += 180;
     }
 
 
-    if (*PointX < CenterX && *PointY < CenterY)
-    {
-        *PointX = *PointX - lengthCA * sin(angle * val);
-        *PointY = *PointY + lengthCA * sin(angle * val);
-    }
+    angle = 10;
 
-    if (*PointX < CenterX && *PointY > CenterY)
-    {
-        *PointX = *PointX + lengthCA * sin(angle * val);
-        *PointY = *PointY + lengthCA * sin(angle * val);
-    }
+    watch = a;
+
+    float an = angle + a;
+
+
+    *PointX = CenterX + lengthCA * sin((an) * M_PIdiv180);  // sin(angle * val)
+    *PointY = CenterY + lengthCA * cos((angle + a)  * M_PIdiv180);  // cos(angle * val)
     
 }
 
