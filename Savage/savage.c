@@ -43,8 +43,8 @@ typedef struct
 
 typedef struct
 {
-    int x;
-    int y;
+    double x;
+    double y;
 
 } SV_Point;
 
@@ -56,7 +56,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 void PaintExperiments(HWND, HDC);
 void DisplayError(DWORD, const char*);
 void SV_SetPixel(int, int, SV_Color);
-void SV_Rotate_Point(int, int, int*, int*, double);
+void SV_Rotate_Point(double, double, double*, double*, double);
 
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -97,8 +97,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
 
 
-    SetTimer(hWnd, TM_SCREEN_REDRAW_TIMER, 200, NULL);  // 35
-    SetTimer(hWnd, TM_TIMER_1, 200, NULL);
+    SetTimer(hWnd, TM_SCREEN_REDRAW_TIMER, 35, NULL);  // 35
+    SetTimer(hWnd, TM_TIMER_1, 35, NULL);
 
 
     aimp_buffer = (char*)malloc(image_size * sizeof(char));
@@ -273,15 +273,15 @@ void PaintExperiments(HWND hWnd, HDC hDC)
     }
     */
 
-    int Ax = 0, Ay = 0;
-    int Cx = 400, Cy = 200;
+    double Ax = 0, Ay = 0;
+    double Cx = 400, Cy = 200;
     // SV_Point p1 = { 450, 330 };
 
     Ax = 100 + time;
     Ay = 200;
 
     SV_Color Cc = { 255, 255, 255 };
-    SV_SetPixel(Cx, Cy, Cc);
+    SV_SetPixel (Cx, Cy, Cc);
 
     //p1.x += time;
    
@@ -354,7 +354,7 @@ void SV_SetPixel(int x, int y, SV_Color col)
 //void increent(int& val){    val++;}
 
 
-void SV_Rotate_Point(int CenterX, int CenterY, int  *PointX, int  *PointY, double angle)
+void SV_Rotate_Point(double CenterX, double CenterY, double *PointX, double *PointY, double angle)
 {
     double lengthCA = 0;
 
@@ -406,21 +406,19 @@ void SV_Rotate_Point(int CenterX, int CenterY, int  *PointX, int  *PointY, doubl
 
     
 
-    double sinAlpha = sin((angle * M_PI) / 180);
-    double cosAlpha = cos((angle * M_PI) / 180);
+    //double sinAlpha = sin((89 * M_PI) / 180);
+    //double cosAlpha = cos((angle * M_PI) / 180);
 
 
-    double xCircle1 = CenterX + (*PointX - CenterX) * cosAlpha - (*PointY - CenterY) * sinAlpha;
-    double yCircle1 = CenterY + (*PointX - CenterX) * sinAlpha + (*PointY - CenterY) * cosAlpha;
+    //double xCircle1 = CenterX + (*PointX - CenterX) * cosAlpha - (*PointY - CenterY) * sinAlpha;
+    //double yCircle1 = CenterY + (*PointX - CenterX) * sinAlpha + (*PointY - CenterY) * cosAlpha;
 
 
 
-    *PointX = CenterX + lengthCA * cos((angle * M_PI)/180);  // sin(angle * val)
-    *PointY = CenterY + lengthCA * sin((angle * M_PI)/180);  // cos(angle * val)
+    *PointX = CenterX + lengthCA * sin((angle * M_PI)/180);  // sin(angle * val)
+    *PointY = CenterY + lengthCA * cos((angle * M_PI)/180);  // cos(angle * val)
 
 
-    *PointX = xCircle1;
-    *PointY = yCircle1;
 
     double p12 = pow((CenterX - *PointX), 2);
     double p22 = pow((CenterY - *PointY), 2);
