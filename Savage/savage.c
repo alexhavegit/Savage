@@ -58,7 +58,7 @@ SV_Point p4 = { 330,115 };
 
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-void PaintExperiments(HWND, HDC);
+void PaintExperiments();    //HWND, HDC
 void DisplayError(DWORD, const char*);
 void SV_SetPixel(int, int, SV_Color);
 void SV_Rotate_Point(double, double, double*, double*, double);
@@ -102,7 +102,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
 
 
-    SetTimer(hWnd, TM_SCREEN_REDRAW_TIMER, 35, NULL);  // 35
+    SetTimer(hWnd, TM_SCREEN_REDRAW_TIMER, 15, NULL);  // 35
     SetTimer(hWnd, TM_TIMER_1, 35, NULL);
 
 
@@ -177,11 +177,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hWnd, &ps);
 
+
+        HDC hDC = BeginPaint(hWnd, &ps);
+
+
+        PaintExperiments();    //hWnd, hDC
         
+        SetDIBitsToDevice(hDC, 0, 0, 800, 450, 0, 0, 0, 450, (char*)aimp_buffer, &info, DIB_RGB_COLORS);
 
-        PaintExperiments(hWnd, hdc);
+
 
         //TextOut(hdc, 10, 10, L"experiments", 11);
 
@@ -197,7 +202,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
         case TM_SCREEN_REDRAW_TIMER:
 
-            InvalidateRect(hWnd, 0, TRUE);
+
+
+            //InvalidateRect(hWnd, 0, TRUE);
+
+            InvalidateRect(hWnd, NULL, FALSE);
 
             return 0;
 
@@ -237,7 +246,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 
-void PaintExperiments(HWND hWnd, HDC hDC)
+void PaintExperiments()  // HWND hWnd, HDC hDC
 {
 
     memset((char*)aimp_buffer, 0, image_size * sizeof(char));
@@ -295,11 +304,13 @@ void PaintExperiments(HWND hWnd, HDC hDC)
 
     double angle = time * 3.6;  // 0.89  
 
+    angle = 20;
 
-    SV_Rotate_Point(Cx, Cy, &p1.x, &p1.y, 10);   //
-    SV_Rotate_Point(Cx, Cy, &p2.x, &p2.y, 10);
-    SV_Rotate_Point(Cx, Cy, &p3.x, &p3.y, 10);
-    SV_Rotate_Point(Cx, Cy, &p4.x, &p4.y, 10);
+
+    SV_Rotate_Point(Cx, Cy, &p1.x, &p1.y, angle);   //
+    SV_Rotate_Point(Cx, Cy, &p2.x, &p2.y, angle);
+    SV_Rotate_Point(Cx, Cy, &p3.x, &p3.y, angle);
+    SV_Rotate_Point(Cx, Cy, &p4.x, &p4.y, angle);
 
 
 
@@ -320,7 +331,6 @@ void PaintExperiments(HWND hWnd, HDC hDC)
     
     //HBITMAP CreateBitmap( [in] int  nWidth,  [in] int nHeight,  [in] UINT   nPlanes, [in] UINT  nBitCount, [in] const VOID * lpBits    );
 
-    SetDIBitsToDevice(hDC, 0, 0, 800, 450, 0, 0, 0, 450, (char*)aimp_buffer, &info, DIB_RGB_COLORS);
 
     wchar_t cWatch[30] = L"12345";
 
@@ -330,7 +340,7 @@ void PaintExperiments(HWND hWnd, HDC hDC)
 
     swprintf(cWatch, 20, L"%f", watch);
 
-    TextOut(hDC, 10, 10, cWatch, 20); //cWatch
+    //TextOut(hDC, 10, 10, cWatch, 20); //cWatch
 
 }
 
@@ -415,7 +425,7 @@ void SV_Rotate_Point(double CenterX, double CenterY, double *PointX, double *Poi
     }
 
 
-    angle = 10;
+    //angle = 10;
 
     
 
