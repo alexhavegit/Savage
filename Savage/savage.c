@@ -8,6 +8,8 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "resource.h"
+
 // 
 
 #define TM_SCREEN_REDRAW_TIMER 1
@@ -23,6 +25,8 @@ HWND hWnd;
 
 bool ready = false;
 
+
+PAINTSTRUCT ps;
 BITMAPINFOHEADER bmiHeader = { 0 };
 BITMAPINFO info = { 0 };
 BITMAPV5HEADER header = { 0 };
@@ -31,7 +35,7 @@ char* aimp_buffer;
 HBITMAP MainBitmap;
 
 int time = 0;
-float watch;
+double WatchVar1, WatchVar2, WatchVar3, WatchVar4;
 
 typedef struct
 {
@@ -48,20 +52,25 @@ typedef struct
 
 } SV_Point;
 
+wchar_t cWatch[100];  //  = L"12345"
+
 SV_Point p1 = { 300,100 };  //400, 300      //450, 330
 SV_Point p2 = { 330,100 };
 SV_Point p3 = { 300,115 };
 SV_Point p4 = { 330,115 };
-
+SV_Point t1 = { 500,115 };
+SV_Point t2 = { 600,145 };
 
 
 
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-void PaintExperiments();    //HWND, HDC
+void PaintExperiments(HDC);    //HWND, 
 void DisplayError(DWORD, const char*);
 void SV_SetPixel(int, int, SV_Color);
+void SV_SetPixelP(SV_Point, SV_Color);
 void SV_Rotate_Point(double, double, double*, double*, double);
+void SV_DrawLine(double, double, double, double, SV_Color);
 
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -81,12 +90,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
     wcex.hInstance = hInstance;
-    //wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_VCPROJECT1));
+    wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+    //wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
     wcex.hCursor = LoadCursor(0, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     //wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_VCPROJECT1);
     wcex.lpszClassName = L"wndclass";
-    //wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+
 
     RegisterClassExW(&wcex);
 
@@ -176,21 +186,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     break;
     case WM_PAINT:
     {
-        PAINTSTRUCT ps;
+        
 
 
         HDC hDC = BeginPaint(hWnd, &ps);
 
 
-        PaintExperiments();    //hWnd, hDC
+        PaintExperiments(hDC);    //hWnd, hDC
         
-        SetDIBitsToDevice(hDC, 0, 0, 800, 450, 0, 0, 0, 450, (char*)aimp_buffer, &info, DIB_RGB_COLORS);
-
-
-
+        
         //TextOut(hdc, 10, 10, L"experiments", 11);
 
         EndPaint(hWnd, &ps);
+
+        ReleaseDC(hWnd, hDC);
 
         ready = true;
     }
@@ -246,10 +255,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 
-void PaintExperiments()  // HWND hWnd, HDC hDC
+void PaintExperiments(HDC hDC)  // HWND hWnd, HDC hDC
 {
 
     memset((char*)aimp_buffer, 0, image_size * sizeof(char));
+
+
+
 
     /*
 
@@ -322,25 +334,45 @@ void PaintExperiments()  // HWND hWnd, HDC hDC
     SV_SetPixel(p4.x, p4.y, c);
 
     
+    SV_DrawLine(p1.x, p1.y, p2.x, p2.y, c);
+    SV_DrawLine(p2.x, p2.y, p4.x, p4.y, c);
+    SV_DrawLine(p3.x, p3.y, p4.x, p4.y, c);
+    SV_DrawLine(p3.x, p3.y, p1.x, p1.y, c);
+
+
+
+    SV_SetPixel(t1.x, t1.y, c);
+    SV_SetPixel(t2.x, t2.y, c);
+
+    SV_DrawLine(t1.x, t1.y, t2.x, t2.y, c);
 
 
     //int* p = (HBITMAP*)hBMP;
-
-
-
-    
     //HBITMAP CreateBitmap( [in] int  nWidth,  [in] int nHeight,  [in] UINT   nPlanes, [in] UINT  nBitCount, [in] const VOID * lpBits    );
 
 
-    wchar_t cWatch[30] = L"12345";
+    
+
+    SetDIBitsToDevice(hDC, 0, 0, 800, 450, 0, 0, 0, 450, (char*)aimp_buffer, &info, DIB_RGB_COLORS);
 
 
-    char array[30];
-    //sprintf_s(array,20, "%f", watch);
+    //WatchVar2 = 5;
+    //WatchVar3 = 7.3;
 
-    swprintf(cWatch, 20, L"%f", watch);
 
-    //TextOut(hDC, 10, 10, cWatch, 20); //cWatch
+    
+    swprintf(cWatch, 20, L"%+4.14f", WatchVar1);
+    TextOut(hDC, 5, 5, cWatch, 17); //cWatch
+
+    swprintf(cWatch, 20, L"%+4.14f", WatchVar2);
+    TextOut(hDC, 185, 5, cWatch, 17); //cWatch
+
+    swprintf(cWatch, 20, L"%+4.14f", WatchVar3);
+    TextOut(hDC, 360, 5, cWatch, 17); //cWatch
+
+    swprintf(cWatch, 20, L"%+4.14f", WatchVar4);
+    TextOut(hDC, 540, 5, cWatch, 17); //cWatch
+
 
 }
 
@@ -360,7 +392,7 @@ void DisplayError(DWORD dw, const char* szFuncName)
 }
 
 
-void SV_SetPixel(int x, int y, SV_Color col)
+void SV_SetPixel(int x, int y, SV_Color Color)
 {
     //color col = { 255,255,255 };
     int ny = 450 - y;
@@ -368,11 +400,24 @@ void SV_SetPixel(int x, int y, SV_Color col)
 
     pointNum = (ny * 800 + x) * 3;
 
-    aimp_buffer[pointNum] = col.b;
-    aimp_buffer[pointNum + 1] = col.g;
-    aimp_buffer[pointNum + 2] = col.r;
+    aimp_buffer[pointNum] = Color.b;
+    aimp_buffer[pointNum + 1] = Color.g;
+    aimp_buffer[pointNum + 2] = Color.r;
 }
 
+
+void SV_SetPixelP(SV_Point Point, SV_Color Color)
+{
+    //color col = { 255,255,255 };
+    int ny = 450 - Point.y;
+    int pointNum = 0;
+
+    pointNum = (ny * 800 + Point.x) * 3;
+
+    aimp_buffer[pointNum] = Color.b;
+    aimp_buffer[pointNum + 1] = Color.g;
+    aimp_buffer[pointNum + 2] = Color.r;
+}
 
 //void increent(int& val){    val++;}
 
@@ -452,12 +497,31 @@ void SV_Rotate_Point(double CenterX, double CenterY, double *PointX, double *Poi
     double dif = lengthCA - lengthCA2;
 
 
-    watch = dif;
+    WatchVar1 = dif;
     
 }
 
 
+void SV_DrawLine(double StartX, double StartY, double EndX, double EndY, SV_Color Color)
+{
+    double a, b, length, PointX = StartX, PointY = StartY;
+    
 
+    length = sqrt(pow((StartX - EndX), 2) + pow((StartY - EndY), 2));
+
+    a = (EndX - StartX) / length;
+    b = (EndY - StartY) / length;
+
+
+    for (int i = 0; i < length; i++)
+    {
+        PointX += a;
+        PointY += b;
+
+        SV_SetPixel(PointX, PointY, Color);
+    }
+
+}
 
 
 
